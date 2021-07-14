@@ -134,6 +134,7 @@ ENV JAVA_11_HOME="/usr/lib/jvm/java-11-amazon-corretto.aarch64" \
     INSTALLED_GRADLE_VERSIONS="5.6.4 6.5" \
     GRADLE_VERSION=6.5 \
     SBT_VERSION=1.3.12 \
+    SBT_DOWNLOAD_SHA256="b4e72bb95f5be8f6a83451ef254c2bff008204456cadfcdd6d1ca4b981c58d57" \
     GRADLE_PATH="$SRC_DIR/gradle" \
     ANT_DOWNLOAD_SHA512="4d80dc6ba23eeec7769085ddb00261b7480b596b56c6e69aa221391acbfb7338eb5855179c88222c8021095ef1f64f43caf2b4f90e8305d7c3128026d4258d06" \
     MAVEN_DOWNLOAD_SHA512="c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0" \
@@ -194,9 +195,10 @@ RUN set -ex \
     && ln -s /usr/local/gradle-$GRADLE_VERSION/bin/gradle /usr/bin/gradle \
     && rm -rf $GRADLE_PATH \
     # Install SBT
-    && wget -nv https://dl.bintray.com/sbt/rpm/sbt-$SBT_VERSION.rpm \
-    && yum install -y sbt-$SBT_VERSION.rpm \
-    && rm -fr sbt-$SBT_VERSION.rpm \
+    && curl -fSL "https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz" -o sbt.tgz \
+    && echo "${SBT_DOWNLOAD_SHA256} *sbt.tgz" | sha256sum -c - \
+    && tar xzvf sbt.tgz -C /usr/local/bin/ \
+    && rm sbt.tgz \
     # Cleanup
     && rm -fr /tmp/* /var/tmp/*
 #****************     END JAVA     ****************************************************
@@ -416,5 +418,3 @@ COPY amazon-ssm-agent.json          /etc/amazon/ssm/
 ENTRYPOINT ["dockerd-entrypoint.sh"]
 
 #=======================End of layer: aarch64_v2  =================
-
-
